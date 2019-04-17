@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/orlandu1983/let-s-go:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/orlandu1983/let-s-go:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: let-s-go
+        chartPath: charts/let-s-go
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/orlandu1983/let-s-go'
+          image.tag: '{{.DIGEST_HEX}}'
